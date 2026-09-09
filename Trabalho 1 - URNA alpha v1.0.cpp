@@ -1,6 +1,8 @@
 // Ultra Registrador de Notas da Andrea
 // Versão Alpha 0.7
 // Desenvolvido por: Carlos e Christian
+// RA Carlos: 251026531
+// RA Christian: 251024067
 // Data: 30/05/2025
 // Descrição: Um sistema simples para registrar notas de alunos, com funcionalidades de cadastro, exibição e análise de notas.
 // Compilador: TDM-GCC 9.2.0 64-bit Release
@@ -153,62 +155,65 @@ int verificacadastro(int *alunos){
 //=====================================================================================
 // FUNCOES DO PROGRAMA
 
-//EXIBIR OS APROVADOS
-void aprovados(int *alunos, char ra[maxalunos][digitos + 1], float freq[maxalunos], float p1[maxalunos], float p2[maxalunos], int *ap1, int *ap2, float media[maxalunos]){
-	char reset[] = "\033[0m";
-	char vermelhoclaro[] = "\033[0;31m";
-	char verdeclaro[] = "\033[0;32m";
+//exbir alunos aprovados - aprovados sao aqueles com media >= 5 e frequencia > 70
+void exibiraprovados(int *alunos, char ra[maxalunos][digitos + 1], float freq[maxalunos], float p1[maxalunos], float p2[maxalunos], int *ap1, int *ap2, float media[maxalunos]) {
 	char spacetitulo[] = "                                           ";
-	int na = 0;
-    for (int i = 0; i < *alunos; i++) {
-        // Calcula a média
-        if (p1[i] != -1 && p2[i] != -1) {
-            media[i] = (p1[i] + p2[i]) / 2;
-
-        } else if (p1[i] != -1 || p2[i] != -1) {
-            media[i] = (p1[i] != -1) ? p1[i] / 2 : p2[i] / 2;
-        } else {
-            media[i] = -1; // Média não calculada
-        }
-    }
 	limpar();
 	cabecalho();
-	printf("%s%sALUNOS APROVADOS%s\n\n",verdeclaro,spacetitulo, "\033[0m");
+	printf("\033[0;36m%sEXIBICAO DOS ALUNOS APROVADOS%s\n\n", spacetitulo, "\033[0m");
+
 	if (*alunos == 0) {
 		printf("Nenhum aluno cadastrado.\n");
 		printf("Pressione qualquer tecla para continuar...\n");
 		getch();
 		return;
 	}
-		if (*ap1 == 0 && *ap2 == 0	) {
+
+	if (*ap1 == 0 && *ap2 == 0) {
 		printf("Nenhuma nota cadastrada.\n");
 		printf("Pressione qualquer tecla para continuar...\n");
 		getch();
 		return;
 	}
-	int aaprovados=0;
-	for(int i=0;i<*alunos;i++){
-		if(freq[i]>70 && media[i]>=5){
-		aaprovados++;
+	int i,j,k;
+	// Calcular a média
+	for (i = 0; i < *alunos; i++) {
+		if (p1[i] != -1 && p2[i] != -1) {
+			media[i] = (p1[i] + p2[i]) / 2;
+		} else if (p1[i] != -1 || p2[i] != -1) {
+			media[i] = (p1[i] != -1) ? p1[i] / 2 : p2[i] / 2;
+		} else {
+			media[i] = -1; // Média não calculada
 		}
 	}
-	if(aaprovados==0){
-		printf("Nenhum aluno aprovado.");
-		printf("\nPressione qualquer tecla para continuar");
-		getch();
-		return;
+	int aux = 0;
+	for (i = 0; i < *alunos; i++) {
+			if(media[i] < 0) media[i] = 0;
+			if(media[i] >= 5 && freq[i] >= 70) {
+				aux+=1;
+			}
+
 	}
-	printf("%s%-10s %-11s %-7s %-7s\n",vermelhoclaro, "RA", "Frequencia", "Média", reset);
-	for(int i=0;i<*alunos;i++){
-		if(freq[i]>70 && media[i]>=5){		
-		printf("%-10s", ra[i]);
-		printf("  %-10.2f", freq[i]);
-		printf("  %-10.1f", media[i]);
-		printf("\nPressione qualquer tecla para continuar");
-		}
+
+	// cabecalho
+	if(aux != 0)printf("\033[0;36m%-10s %-7s %-12s\n\033[0m", "RA", "Media", "Frequencia");
+		for (i = 0; i < *alunos; i++) {
+			if(media[i] >= 5 && freq[i] > 70) {
+				printf("%-10s %-7.2f %-12.2f\n", ra[i], media[i], freq[i]);
+
+			}
 	}
-		getch();
+	if (aux == 0) {
+		printf("Nenhum aluno aprovado.\n");
+	} else {
+	    printf("Obs: Para o calculo, Notas nao cadastradas foram consideradas como 0.00!\n");
+		printf("\n\033[0;36mTotal de alunos aprovados:\033[0m %d\n", aux);
+	}
+	printf("\nPressione qualquer tecla para continuar...\n");
+	getch();
+	return;
 }
+
 
 //exibir notas abaixo de 5
 void exibirabaixo5(int *alunos, char ra[maxalunos][digitos + 1], float freq[maxalunos], float p1[maxalunos], float p2[maxalunos], int *ap1, int *ap2, float media[maxalunos]) {
@@ -877,7 +882,7 @@ void menuprincipal(int *alunos, char ra[maxalunos][digitos + 1], float freq[maxa
 					break;
 				case 6://mostrar aprovados na turma media >= 5, frequencia > 70
 					if(!verificacadastro(alunos)) break;
-					aprovados(alunos, ra, freq, p1, p2, ap1, ap2, media);
+					exibiraprovados(alunos, ra, freq, p1, p2, ap1, ap2, media);
 					break;
 				case 7://sair
 					printf("Saindo...\n");
